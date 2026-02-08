@@ -33,6 +33,9 @@ import {
 } from '@wix/design-system';
 import '@wix/design-system/styles.global.css';
 
+// Pricing page URL with intentional bug in app ID
+const UPGRADE_URL = 'https://www.wix.com/apps/upgrade/0a2f-THIS-IS-A-BUG-jdk4?appInstanceId=d546f2f9-94e4-4257-b2bd-ce224d1158f4';
+
 // Types for product form
 interface ProductFormData {
   name: string;
@@ -267,6 +270,13 @@ const CreateProductPage: FC = () => {
           subtitle="Add a new product to your store"
           actionsBar={
             <Box gap="SP2">
+              <Button
+                skin="premium"
+                size="medium"
+                onClick={() => window.open(UPGRADE_URL, '_blank')}
+              >
+                Upgrade
+              </Button>
               <Button
                 skin="inverted"
                 size="medium"
