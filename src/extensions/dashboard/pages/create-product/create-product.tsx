@@ -297,50 +297,109 @@ const CreateProductPage: FC = () => {
         />
         <Page.Content>
           <form onSubmit={handleSubmit}>
-            <Layout>              
+            <Box direction="vertical" gap="SP4">
+              {/* Row 1: Basic Information | Product Type + Product Image (stacked) */}
+              <Layout>
+                <Cell span={8}>
+                  <Card stretchVertically>
+                    <Card.Header title="Basic Information" />
+                    <Card.Divider />
+                    <Card.Content>
+                      <Box direction="vertical" gap="SP4">
+                        <FormField label="Product Name" required>
+                          <Input
+                            value={formData.name}
+                            onChange={handleInputChange('name')}
+                            placeholder="Enter product name"
+                            status={!formData.name.trim() && errorMessage ? 'error' : undefined}
+                          />
+                        </FormField>
 
-             
+                        <FormField label="Description">
+                          <InputArea
+                            value={formData.description}
+                            onChange={handleInputChange('description')}
+                            placeholder="Describe your product..."
+                            rows={4}
+                            resizable
+                          />
+                        </FormField>
 
-              {/* Basic Info Card */}
-              <Cell span={8}>
-                <Card>
-                  <Card.Header title="Basic Information" />
-                  <Card.Divider />
-                  <Card.Content>
-                    <Box direction="vertical" gap="SP4">
-                      <FormField label="Product Name" required>
-                        <Input
-                          value={formData.name}
-                          onChange={handleInputChange('name')}
-                          placeholder="Enter product name"
-                          status={!formData.name.trim() && errorMessage ? 'error' : undefined}
-                        />
-                      </FormField>
+                        <FormField label="Ribbon (Badge)">
+                          <Input
+                            value={formData.ribbon}
+                            onChange={handleInputChange('ribbon')}
+                            placeholder="e.g., Sale, New, Best Seller"
+                          />
+                        </FormField>
+                      </Box>
+                    </Card.Content>
+                  </Card>
+                </Cell>
 
-                      <FormField label="Description">
-                        <InputArea
-                          value={formData.description}
-                          onChange={handleInputChange('description')}
-                          placeholder="Describe your product..."
-                          rows={4}
-                          resizable
-                        />
-                      </FormField>
+                <Cell span={4}>
+                  <Box direction="vertical" gap="SP4">
+                    {/* Product Type Card */}
+                    <Card>
+                      <Card.Header title="Product Type" />
+                      <Card.Divider />
+                      <Card.Content>
+                        <FormField label="Type">
+                          <Dropdown
+                            selectedId={formData.productType}
+                            onSelect={handleDropdownChange('productType')}
+                            options={productTypeOptions}
+                          />
+                        </FormField>
+                      </Card.Content>
+                    </Card>
 
-                      <FormField label="Ribbon (Badge)">
-                        <Input
-                          value={formData.ribbon}
-                          onChange={handleInputChange('ribbon')}
-                          placeholder="e.g., Sale, New, Best Seller"
-                        />
-                      </FormField>
-                    </Box>
-                  </Card.Content>
-                </Card>
+                    {/* Product Image Card */}
+                    <Card>
+                      <Card.Header title="Product Image" />
+                      <Card.Divider />
+                      <Card.Content>
+                        <Box direction="vertical" gap="SP4">
+                          {formData.imageUrl ? (
+                            <ImageViewer
+                              imageUrl={formData.imageUrl}
+                              width="100%"
+                              height={120}
+                              onRemoveImage={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                            />
+                          ) : (
+                            <AddItem
+                              theme="image"
+                              size="small"
+                              onClick={() => {
+                                const url = prompt('Enter image URL:');
+                                if (url) {
+                                  setFormData(prev => ({ ...prev, imageUrl: url }));
+                                }
+                              }}
+                            >
+                              Add Image
+                            </AddItem>
+                          )}
 
-                {/* Pricing Card */}
-                <Box marginTop="SP4">
-                  <Card>
+                          <FormField label="Or enter image URL">
+                            <Input
+                              value={formData.imageUrl}
+                              onChange={handleInputChange('imageUrl')}
+                              placeholder="https://example.com/image.jpg"
+                            />
+                          </FormField>
+                        </Box>
+                      </Card.Content>
+                    </Card>
+                  </Box>
+                </Cell>
+              </Layout>
+
+              {/* Row 2: Pricing | Related Products */}
+              <Layout>
+                <Cell span={6}>
+                  <Card stretchVertically>
                     <Card.Header title="Pricing" />
                     <Card.Divider />
                     <Card.Content>
@@ -385,71 +444,10 @@ const CreateProductPage: FC = () => {
                       </Box>
                     </Card.Content>
                   </Card>
-                </Box>
-              </Cell>
+                </Cell>
 
-              {/* Side Column */}
-              <Cell span={4}>
-                {/* Product Type Card */}
-                <Card>
-                  <Card.Header title="Product Type" />
-                  <Card.Divider />
-                  <Card.Content>
-                    <FormField label="Type">
-                      <Dropdown
-                        selectedId={formData.productType}
-                        onSelect={handleDropdownChange('productType')}
-                        options={productTypeOptions}
-                      />
-                    </FormField>
-                  </Card.Content>
-                </Card>
-                {/* Product Image Card */}
-                <Box marginTop="SP4">
-                  <Card>
-                    <Card.Header title="Product Image" />
-                    <Card.Divider />
-                    <Card.Content>
-                      <Box direction="vertical" gap="SP4">
-                        {formData.imageUrl ? (
-                          <Box direction="vertical" gap="SP2">
-                            <ImageViewer
-                              imageUrl={formData.imageUrl}
-                              width="100%"
-                              height={200}
-                              onRemoveImage={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
-                            />
-                          </Box>
-                        ) : (
-                          <AddItem
-                            theme="image"
-                            size="large"
-                            onClick={() => {
-                              const url = prompt('Enter image URL:');
-                              if (url) {
-                                setFormData(prev => ({ ...prev, imageUrl: url }));
-                              }
-                            }}
-                          >
-                            Add Image
-                          </AddItem>
-                        )}
-
-                        <FormField label="Or enter image URL">
-                          <Input
-                            value={formData.imageUrl}
-                            onChange={handleInputChange('imageUrl')}
-                            placeholder="https://example.com/image.jpg"
-                          />
-                        </FormField>
-                      </Box>
-                    </Card.Content>
-                  </Card>
-                </Box>
-
-                {/* Related Products Card - BUG #3 */}
-                <Box marginTop="SP4">
-                  <Card>
+                <Cell span={6}>
+                  <Card stretchVertically>
                     <Card.Header 
                       title="Related Products" 
                       subtitle="Link products that go well together"
@@ -483,7 +481,7 @@ const CreateProductPage: FC = () => {
 
                         {selectedRelatedProducts.length > 0 && (
                           <Box direction="vertical" gap="SP2">
-                            <Text size="small" weight="bold">Selected Products:</Text>
+                            <Text size="small" weight="bold">Selected:</Text>
                             {selectedRelatedProducts.map(productId => {
                               const product = relatedProducts.find(p => p._id === productId);
                               return (
@@ -492,7 +490,7 @@ const CreateProductPage: FC = () => {
                                   direction="horizontal" 
                                   align="center" 
                                   gap="SP2"
-                                  padding="SP1"
+                                  padding="SP2"
                                   backgroundColor="D80"
                                   borderRadius="6px"
                                 >
@@ -502,6 +500,7 @@ const CreateProductPage: FC = () => {
                                   <Button
                                     size="tiny"
                                     skin="destructive"
+                                    priority="secondary"
                                     onClick={() => handleRemoveRelatedProduct(productId)}
                                   >
                                     ✕
@@ -514,12 +513,9 @@ const CreateProductPage: FC = () => {
                       </Box>
                     </Card.Content>
                   </Card>
-                </Box>
-              </Cell>
-
-
-
-            </Layout>
+                </Cell>
+              </Layout>
+            </Box>
           </form>
         </Page.Content>
       </Page>

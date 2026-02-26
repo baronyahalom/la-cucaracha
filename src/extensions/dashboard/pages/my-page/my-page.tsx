@@ -68,6 +68,7 @@ const STORAGE_KEY = 'la-cucaracha-product-edits';
 const DashboardPage: FC = () => {
   const [productList, setProductList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [storesNotInstalled, setStoresNotInstalled] = useState(false);
   const [editingProduct, setEditingProduct] = useState<EditableProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -101,6 +102,7 @@ const DashboardPage: FC = () => {
     const loadProducts = async () => {
       try {
         setLoading(true);
+        setStoresNotInstalled(false);
         const response = await httpClient.fetchWithAuth(
           'https://www.wixapis.com/stores-reader/v1/products/query',
           {
@@ -115,10 +117,29 @@ const DashboardPage: FC = () => {
             }),
           }
         );
+        
+        // Check if Stores is not installed (403 or specific error)
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage = errorData?.message || '';
+          
+          if (response.status === 403 || errorMessage.includes('not installed') || errorMessage.includes('APP_NOT_INSTALLED')) {
+            setStoresNotInstalled(true);
+            setProductList([]);
+            return;
+          }
+          throw new Error(`API error: ${response.status}`);
+        }
+        
         const data = await response.json();
         setProductList(data.products || []);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load products:', err);
+        // Check error message for stores not installed
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        if (errorMessage.includes('not installed') || errorMessage.includes('APP_NOT_INSTALLED') || errorMessage.includes('403')) {
+          setStoresNotInstalled(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -202,7 +223,7 @@ const DashboardPage: FC = () => {
     <WixDesignSystemProvider features={{ newColorsBranding: true }}>
       <Page>
         <Page.Header
-          title="Store Products - Store Products"
+          title="La Cucaracha - Store Products"
           subtitle="View and edit your store products"
           actionsBar={
             <Button
@@ -219,16 +240,62 @@ const DashboardPage: FC = () => {
             <Box align="center" padding="SP10">
               <Loader size="medium" />
             </Box>
+          ) : storesNotInstalled ? (
+            <Layout>
+              <Cell span={12}>
+                <Card>
+                  <Card.Content>
+                    <Box 
+                      direction="vertical" 
+                      align="center" 
+                      padding="SP10" 
+                      gap="SP4"
+                    >
+                      <Text weight="bold" size="medium">
+                        No Stores connected
+                      </Text>
+                      <Text secondary>
+                        Please install Wix Stores to use this app.
+                      </Text>
+                      <Button
+                        as="a"
+                        href="https://www.wix.com/app-market/wix-stores"
+                        target="_blank"
+                        skin="standard"
+                      >
+                        Install Wix Stores
+                      </Button>
+                    </Box>
+                  </Card.Content>
+                </Card>
+              </Cell>
+            </Layout>
           ) : (
             <Layout>
               {productList.length === 0 ? (
                 <Cell span={12}>
                   <Card>
                     <Card.Content>
-                      <Box align="center" padding="SP6">
-                        <Text secondary>
-                          No products found in your store.
+                      <Box 
+                        direction="vertical" 
+                        align="center" 
+                        padding="SP6" 
+                        gap="SP4"
+                      >
+                        <Text weight="bold" size="medium">
+                          No Stores connected
                         </Text>
+                        <Text secondary>
+                          Please install Wix Stores.
+                        </Text>
+                        <Button
+                          as="a"
+                          href="https://www.wix.com/app-market/wix-stores"
+                          target="_blank"
+                          skin="standard"
+                        >
+                          Install Wix Stores
+                        </Button>
                       </Box>
                     </Card.Content>
                   </Card>
@@ -240,7 +307,7 @@ const DashboardPage: FC = () => {
                   
                   return (
                     <Cell key={product.id} span={4}>
-                      <Card>
+                      <Card stretchVertically>
                         <Box height="180px" backgroundColor="D80">
                           {displayProduct.media?.mainMedia?.image?.url ? (
                             <Image
@@ -278,22 +345,26 @@ const DashboardPage: FC = () => {
                         />
                         <Card.Divider />
                         <Card.Content>
-                          <Box direction="vertical" gap="SP3">
-                            {displayProduct.description && (
+                          <Box direction="vertical" gap="SP3" height="120px">
+                            <Box height="60px" overflow="hidden">
                               <Text size="small" secondary>
-                                {displayProduct.description.length > 100 
-                                  ? `${displayProduct.description.substring(0, 100)}...` 
-                                  : displayProduct.description}
+                                {displayProduct.description 
+                                  ? (displayProduct.description.length > 100 
+                                      ? `${displayProduct.description.substring(0, 100)}...` 
+                                      : displayProduct.description)
+                                  : 'No description'}
                               </Text>
-                            )}
-                            <Button
-                              size="small"
-                              skin="standard"
-                              onClick={() => handleEditClick(product)}
-                              fullWidth
-                            >
-                              Edit Product
-                            </Button>
+                            </Box>
+                            <Box marginTop="auto">
+                              <Button
+                                size="small"
+                                skin="standard"
+                                onClick={() => handleEditClick(product)}
+                                fullWidth
+                              >
+                                Edit Product
+                              </Button>
+                            </Box>
                           </Box>
                         </Card.Content>
                       </Card>

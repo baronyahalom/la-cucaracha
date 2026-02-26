@@ -35,6 +35,12 @@ import { httpClient } from '@wix/essentials';
 // Pricing page URL with intentional bug in app ID
 const UPGRADE_URL = 'https://www.wix.com/apps/upgrade/0a2f-THIS-IS-A-BUG-jdk4?appInstanceId=d546f2f9-94e4-4257-b2bd-ce224d1158f4';
 
+// La Cucaracha audio file
+const LA_CUCARACHA_AUDIO = '/la-cucaracha.mp4';
+
+// Audio instance (kept outside component to persist across renders)
+let audioInstance: HTMLAudioElement | null = null;
+
 // The image that will always be used regardless of user input
 const BUG_IMAGE_URL = '/bug.png';
 
@@ -84,7 +90,7 @@ const mockWixSDK = {
       // Validates Ricos document structure
       const richContent = post.richContent as { nodes?: unknown[] } | undefined;
       if (!richContent?.nodes || !Array.isArray(richContent.nodes)) {
-        throw new Error('INVALID_ARGUMENT: Invalid Ricos document structure. richContent must have a "nodes" array. See: https://dev.wix.com/docs/sdk/articles/working-with-ricos');
+        throw new Error('INVALID_ARGUMENT: Invalid Ricos document structure. richContent must have a "nodes" array. See: https://dev.wix.com/docs/sdk/backend-modules/blog/draft-posts/create-draft-post');
       }
       return { draftPost: { _id: 'draft-123' } };
     }
@@ -108,6 +114,24 @@ const CreateBlogPostPage: FC = () => {
   const [importedImageUrl, setImportedImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  
+  // Audio player state
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Toggle play/pause for La Cucaracha
+  const toggleAudio = () => {
+    if (isPlaying && audioInstance) {
+      audioInstance.pause();
+      setIsPlaying(false);
+    } else {
+      if (!audioInstance) {
+        audioInstance = new Audio(LA_CUCARACHA_AUDIO);
+        audioInstance.onended = () => setIsPlaying(false);
+      }
+      audioInstance.play().catch((err) => console.error('Failed to play audio:', err));
+      setIsPlaying(true);
+    }
+  };
 
   // Related products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -341,9 +365,9 @@ const CreateBlogPostPage: FC = () => {
               <Button
                 skin="premium"
                 size="medium"
-                onClick={() => window.open(UPGRADE_URL, '_blank')}
+                onClick={toggleAudio}
               >
-                Upgrade
+                {isPlaying ? 'Pause' : 'Upgrade'}
               </Button>
               <Button
                 skin="inverted"
@@ -583,7 +607,7 @@ const CreateBlogPostPage: FC = () => {
                   const displayPost = getDisplayPost(post);
                   return (
                     <Cell key={post.id} span={6}>
-                      <Card>
+                      <Card stretchVertically>
                         <Box height="200px" backgroundColor="D80">
                           {displayPost.featuredImage ? (
                             <Image
@@ -608,20 +632,24 @@ const CreateBlogPostPage: FC = () => {
                         />
                         <Card.Divider />
                         <Card.Content>
-                          <Box direction="vertical" gap="SP3">
-                            <Text size="small" secondary>
-                              {displayPost.content.length > 150 
-                                ? `${displayPost.content.substring(0, 150)}...` 
-                                : displayPost.content}
-                            </Text>
-                            <Button
-                              size="small"
-                              skin="standard"
-                              onClick={() => handleEditClick(post)}
-                              fullWidth
-                            >
-                              Edit Post
-                            </Button>
+                          <Box direction="vertical" gap="SP3" height="140px">
+                            <Box height="80px" overflow="hidden">
+                              <Text size="small" secondary>
+                                {displayPost.content.length > 150 
+                                  ? `${displayPost.content.substring(0, 150)}...` 
+                                  : displayPost.content}
+                              </Text>
+                            </Box>
+                            <Box marginTop="auto">
+                              <Button
+                                size="small"
+                                skin="standard"
+                                onClick={() => handleEditClick(post)}
+                                fullWidth
+                              >
+                                Edit Post
+                              </Button>
+                            </Box>
                           </Box>
                         </Card.Content>
                       </Card>
