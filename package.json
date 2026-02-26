@@ -18,19 +18,27 @@
     "@wix/design-system": "^1.0.0",
     "@wix/editor": "^1.356.0",
     "@wix/essentials": "^0.1.23",
-    "astro": "^5.8.0",
-    "nstall": "^0.2.0",
+    "astro": "^6.0.0-beta.11",
     "react-to-webcomponent": "^2.0.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "^12.5.3",
-    "@astrojs/react": "^4.3.0",
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/react": "^4.4.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
-    "@wix/cli": "^1.1.135",
+    "@wix/cli": "^1.0.1",
     "@wix/sdk-types": "^1.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "overrides": {
+    "extend": "^2.0.2",
+    "lodash": "^4.17.21",
+    "tar": "^6.2.0",
+    "vite": "^5.4.0",
+    "path-to-regexp": "^6.3.0",
+    "moment": "^2.30.0",
+    "d3-color": "^3.1.0"
   }
 }
